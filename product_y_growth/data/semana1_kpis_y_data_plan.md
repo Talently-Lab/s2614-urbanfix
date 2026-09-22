@@ -54,47 +54,45 @@ En UrbanFix, **liquidez** = probabilidad de que un cliente encuentre un técnico
 
 No es un cuarto KPI suelto: es la métrica “reina” que se construye con los 3 KPIs anteriores + una ventana temporal.
 
-### Cómo medirla (definición matemática)
+### Cómo medirla (en simple)
 
-Sea \(T\) una ventana de tiempo acordada para el MVP (propuesta: **24 horas** desde `created_at`).
+Acordamos una **ventana de tiempo T** (propuesta MVP: **24 horas**).  
+Pregunta de negocio: *de las solicitudes creadas en el período, ¿qué % consiguió técnico en ≤ 24 h?*
 
-**Liquidez por solicitud (binaria):**
+**Paso 1 — Por cada solicitud**
 
-\[
-L_i =
-\begin{cases}
-1 & \text{si existe } accepted\_at_i \text{ y } (accepted\_at_i - created\_at_i) \le T \\
-0 & \text{en caso contrario}
-\end{cases}
-\]
+| Condición | Resultado |
+|-----------|-----------|
+| Tiene `accepted_at` **y** (`accepted_at` − `created_at`) ≤ T | Cuenta como **match rápido** (1) |
+| No fue aceptada, o se aceptó **después** de T | **No** cuenta (0) |
 
-**Liquidez del período (agregada):**
+**Paso 2 — Del período**
 
-\[
-\text{Liquidez} = \frac{\sum_{i \in S} L_i}{|S|}
-\]
+```text
+Liquidez = (solicitudes con match rápido) / (solicitudes creadas en el período)
+```
 
-donde \(S\) = conjunto de solicitudes **creadas** en el período (no borradores).
+Ejemplo: 10 solicitudes creadas; 7 aceptadas dentro de 24 h → liquidez = **7/10 = 0,70 (70%)**.
 
 **Lectura:**
 
 | Liquidez | Lectura de negocio |
 |----------|--------------------|
-| Alta (ej. ≥ 0,70) | La mayoría de clientes consigue técnico en ≤ T |
+| Alta (ej. ≥ 70%) | La mayoría de clientes consigue técnico en ≤ T |
 | Media | Hay match, pero lento o desigual por oficio/zona |
-| Baja | Problema clásico huevo–gallina: demanda sin oferta (o al revés, si hay pocos pedidos) |
+| Baja | Problema huevo–gallina: demanda sin oferta (o al revés, si hay pocos pedidos) |
 
 ### Variantes recomendadas (misma data)
 
-1. **Liquidez por oficio** (`category` / `trade`): plomería vs electricidad pueden divergir.
-2. **Liquidez temporal:** misma fórmula con \(T\) = 2 h, 6 h, 24 h (curva).
-3. **Complemento con ratio:** si liquidez baja y ratio cliente/técnico alto → faltan técnicos; si liquidez baja y ratio bajo → falta demanda o mala distribución.
+1. **Liquidez por oficio** (`category`): plomería vs electricidad pueden divergir.
+2. **Misma fórmula con T = 2 h, 6 h y 24 h** (ver qué tan “rápido” es el match).
+3. **Cruzar con el ratio cliente/técnico:** liquidez baja + ratio alto → faltan técnicos; liquidez baja + ratio bajo → falta demanda o mala distribución.
 
 ### Supuestos MVP (documentar con el equipo)
 
 - Sin geolocalización avanzada: no segmentamos por distancia; opcional filtrar por `city` / `zone` si el modelo lo tiene.
 - Sin chat/pagos: “match” = **aceptación del técnico**, no trabajo finalizado ni pago.
-- \(T = 24h\) es hipótesis de Semana 1; se puede ajustar con PM cuando haya datos.
+- T = 24 h es hipótesis de Semana 1; se puede ajustar con PM cuando haya datos.
 
 ---
 
@@ -217,7 +215,7 @@ WHERE created_at >= date_trunc('week', now());
 
 - [ ] Backend confirma Must de la matriz (§3.2–3.3) en el modelo de datos
 - [ ] Frontend captura `category` y dispara create / accept / cancel / reject
-- [ ] PM acuerda ventana \(T\) de liquidez (propuesta: 24 h)
+- [ ] PM acuerda ventana T de liquidez (propuesta: 24 h)
 - [ ] QA incluye casos: accept + cancel concurrente; request sin respuesta > T
 - [ ] Data publica este doc en `product_y_growth/data/` y avisa en el canal del equipo
 
@@ -225,4 +223,4 @@ WHERE created_at >= date_trunc('week', now());
 
 ## 6. Resumen ejecutivo (1 párrafo)
 
-UrbanFix mide salud de Marketplace con **tres KPIs**: tasa de solicitudes aceptadas, tiempo medio de aceptación y ratio cliente/técnico activos. La **liquidez** se define como la proporción de solicitudes creadas que obtienen aceptación en ≤ \(T\) (propuesta 24 h). Para calcularlo, Backend debe persistir desde el día uno timestamps (`created_at`, `accepted_at`), estados, roles, vínculo cliente–técnico y categoría de oficio; sin eso no hay telemetría de match ni dashboard de Admin en Semanas posteriores.
+UrbanFix mide salud de Marketplace con **tres KPIs**: tasa de solicitudes aceptadas, tiempo medio de aceptación y ratio cliente/técnico activos. La **liquidez** es el % de solicitudes creadas que obtienen aceptación en ≤ 24 h (ventana T acordada). Para calcularlo, Backend debe persistir desde el día uno timestamps (`created_at`, `accepted_at`), estados, roles, vínculo cliente–técnico y categoría de oficio; sin eso no hay telemetría de match ni dashboard de Admin en Semanas posteriores.
