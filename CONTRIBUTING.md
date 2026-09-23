@@ -55,4 +55,17 @@ El formato es: `tipo(scope): mensaje claro y en imperativo`
 
 - Si tu tarea en el Frontend depende de un endpoint que el Backend aún no ha terminado, repórtalo en tu herramienta de gestión (Trello/Notion) y avanza usando datos falsos (*mocks*).
 - Si hay bloqueos, usa los canales de comunicación (Slack/Discord) mencionando al encargado.
-asdaksmdlaksmdlm
+
+## 5. Solución de Problemas (Troubleshooting)
+
+**¿Tu `git push` fue rechazado con un error rojo gigante?**
+Si ves un mensaje en tu terminal parecido a este:
+> `! [remote rejected] develop -> develop (push declined due to repository rule violations)` o `GH013: Repository rule violations found`
+
+¡No te asustes, el repositorio no está roto! Esto significa que las reglas de protección de GitHub están funcionando perfectamente. El error aparece porque intentaste hacer push de tus cambios directamente a `develop` o `main`.
+
+**¿Cómo lo soluciono?**
+Tus cambios están a salvo en tu computadora. Para subirlos, aplica nuestro flujo de trabajo:
+1. Pasa tus cambios a una rama nueva: `git checkout -b <tu-rama>` (ej. `front/mi-tarea`).
+2. Sube esa rama: `git push -u origin <tu-rama>`.
+3. Entra a GitHub y abre un Pull Request hacia `develop`.
