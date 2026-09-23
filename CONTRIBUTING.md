@@ -55,3 +55,4 @@ El formato es: `tipo(scope): mensaje claro y en imperativo`
 
 - Si tu tarea en el Frontend depende de un endpoint que el Backend aún no ha terminado, repórtalo en tu herramienta de gestión (Trello/Notion) y avanza usando datos falsos (*mocks*).
 - Si hay bloqueos, usa los canales de comunicación (Slack/Discord) mencionando al encargado.
+asdaksmdlaksmdlm
